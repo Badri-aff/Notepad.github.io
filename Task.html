@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Notepad App</title>
+	<style>
+		h1 {
+			text-align: center;
+		}
+		label {
+			display: block;
+			margin-top: 10px;
+		}
+		input[type="text"], textarea {
+			width: 100%;
+			padding: 10px;
+			border: 1px solid #ccc;
+			border-radius: 4px;
+			box-sizing: border-box;
+		}
+		textarea {
+			height: 400px;
+		}
+		button {
+			margin-top: 10px;
+			padding: 10px;
+			background-color: #4CAF50;
+			color: white;
+			border: none;
+			border-radius: 4px;
+			cursor: pointer;
+		}
+		button:hover {
+			background-color: #3e8e41;
+		}
+		.note {
+			margin-bottom: 20px;
+			padding: 10px;
+			border: 1px solid #ccc;
+			border-radius: 4px;
+			box-sizing: border-box;
+		}
+		.note h2 {
+			margin-top: 0;
+			margin-bottom: 10px;
+		}
+		.note p {
+			margin: 0;
+		}
+	</style>
+</head>
+<body>
+	<h1>Notepad</h1>
+	<label for="title">Title:</label>
+	<input type="text" id="title">
+	<label for="body">Body:</label>
+	<textarea id="body"></textarea>
+	<button id="save-btn">Save Note</button>
+	<div>
+		<label for="search">Search:</label>
+		<input type="text" id="search">
+	</div>
+	<div id="notes-container"></div>
+	<script>
+		// Get the input and textarea elements, and the save button
+		var title = document.getElementById("title");
+		var body = document.getElementById("body");
+		var saveBtn = document.getElementById("save-btn");
+		var notesContainer = document.getElementById("notes-container");
+		var searchInput = document.getElementById("search");
+
+		// Load saved notes from local storage
+		var savedNotes = JSON.parse(localStorage.getItem("notepad_notes")) || [];
+		renderNotes();
+
+		// Save a new note to local storage
+		function saveNote() {
+			var note = {
+				title: title.value,
+				body: body.value
+			};
+			savedNotes.push(note);
+			localStorage.setItem("notepad_notes", JSON.stringify(savedNotes));
+			renderNotes();
+			clearFields();
+		}
+
+		// Edit an existing note in local storage
+		function editNote(index) {
+			var note = savedNotes[index];
+			title.value = note.title;
+			body.value = note.body;
+			savedNotes.splice(index, 1);
+			localStorage.setItem("notepad_notes", JSON.stringify(savedNotes));
+			renderNotes();
+		}
+
+		// Delete an existing note from local storage
+		function deleteNote(index) {
+			savedNotes.splice(index, 1);
+			localStorage.setItem("notepad_notes", JSON.stringify(savedNotes));
+			renderNotes();
+		}
+
+		// Render all saved notes to the notes container
+		function renderNotes() {
+			notesContainer.innerHTML = "";
+			var searchTerm = searchInput.value.toLowerCase();
+			for (var i = 0; i < savedNotes.length; i++) {
+				var note = savedNotes[i];
+				if (note.title.toLowerCase().includes(searchTerm) || note.body.toLowerCase().includes(searchTerm)) {
+					var noteEl =				`<div class="note">
+					<h2>${note.title}</h2>
+					<p>${note.body}</p>
+					<button onclick="editNote(${i})">Edit</button>
+					<button onclick="deleteNote(${i})">Delete</button>
+				</div>`;
+				notesContainer.innerHTML += noteEl;
+			}
+		}
+	}
+
+	// Clear the title and body fields
+	function clearFields() {
+		title.value = "";
+		body.value = "";
+	}
+
+	// Event listeners
+	saveBtn.addEventListener("click", saveNote);
+	searchInput.addEventListener("input", renderNotes);
+</script>
+</body>
+</html>
